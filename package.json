@@ -1,0 +1,27 @@
+{
+  "name": "api_rest_users_curso_node",
+  "version": "3.0.1",
+  "description": "API Rest de Usuários com Knex.js e JWT",
+  "main": "server.js",
+  "scripts": {
+    "start": "node .",
+    "dev": "nodemon ."
+  },
+  "author": "Higor Costa",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "googleapis": "^125.0.0",
+    "jsonwebtoken": "^9.0.1",
+    "knex": "^2.5.1",
+    "nodemailer": "^6.9.4",
+    "pg": "^8.11.3",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
