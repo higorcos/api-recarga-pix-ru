@@ -1,5 +1,4 @@
 const express = require("express")
-const app = express();
 const router = express.Router();
 const AdminAuth = require('../middleware/admin/AdminAuth');
 const AllAuth = require('../middleware/secondary/allAuth');
@@ -14,7 +13,6 @@ router.get('/userr', UserController.index);
 router.post('/user', UserController.create);
 router.get('/user/:id', UserController.findById);
 router.patch('/user/role/:id', UserController.updateRole);
-router.patch('/user/card/:id', UserController.updateCard);
 
 router.post('/recovery-password', UserController.recoveryPassword);
 router.put('/recovery-password/:token', UserController.changePassword);

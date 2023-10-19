@@ -1,9 +1,9 @@
 const knex = require('../database/connection');
-const UsersModel = require('./User');
+const UsersModel = require('./UserModel');
 const { v4: uuid } = require('uuid');
 const dateFormat = require('../utils/date')
 
-class TokenUsers{
+class TokenUsersModel{
     async create(email){
         
         const resultUser = await UsersModel.findByEmail(email)
@@ -93,4 +93,4 @@ class TokenUsers{
     }
 }
 
-module.exports = new TokenUsers();
+module.exports = new TokenUsersModel();

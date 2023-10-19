@@ -1,5 +1,5 @@
-const UsersModel = require('../models/User');
-const TokenModel = require('../models/PasswordToken');
+const UsersModel = require('../models/UserModel');
+const TokenModel = require('../models/PasswordTokenModel');
 const servicesEmail = require('../utils/servicesEmail');
 
 require('dotenv').config()
@@ -140,33 +140,6 @@ class UserController{
                         msgErr:resultUpdate
                     });
                        
-                }
-           
-                
-    }
-
-    //#Vai sair
-    async updateCard(req,res){
-        const {card} = req.body;
-        const {id} = req.params; 
-        
-           
-                const resultUpdate = await UsersModel.updateCard({id,card});
- 
-                    console.log(resultUpdate)
-                if(!resultUpdate.err){
-                    return res.status(200).json({
-                        error: false,
-                        msg:'Sucesso Update, número do cartão',
-                        data: req.body,
-                    });
-                }else{
-                    return res.status(409).json({
-                        error: true,
-                        msg:'Erro Update, número do cartão',
-                        msgErr:resultUpdate
-                    });
-                        
                 }
            
                 
