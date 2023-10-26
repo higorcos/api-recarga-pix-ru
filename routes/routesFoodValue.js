@@ -7,7 +7,7 @@ const FoodValueController = require('../controllers/FoodValueController')
 
 
 router.get('/food-value', FoodValueController.showData);
-router.put('/food-value', FoodValueController.updated);
+router.put('/food-value/:id', FoodValueController.updated);
 
 
 

@@ -36,15 +36,55 @@ class FoodValueController{
            
     }
     async updated(req,res){
+        const id = req.params.id
+        const data = req.body;
+        const {name, description, value} = data;
+
+        const schema = yup.object({
+            name: 
+                yup.string()
+                .required(), 
+            description: 
+                yup.string()
+                .required(),
+            value: 
+                yup.string()
+                .required()
+                .test("success", "Erro, o parâmetro '${path}' está fora do formato. Exemplo:'${path}': '1.123,00'. O valor deve ser uma string e casa decimal deve ser separado por vírgula", (value) =>{
+
+                    const regex = /,\d{2}$/;
+                    const resultString = regex.test(value);
+                    console.log(resultString)
+                    if(resultString){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                })
+        });
 
         try{
-            const newDataFood = await FoodValueModel.updated('1','Comida 00','-0','12,00');
+            await schema.validate(data)
+          
+        }catch(err){
+            console.log(err)
+            return res.status(400).json({
+                error: true,
+                msg:'Erro no envio dos parâmetros',
+                dataError: err.errors
+                
+            });
+        }
+
+        try{
+            const newDataFood = await FoodValueModel.updated(id,name,description,value);
             
                 console.log(newDataFood)
             if(!newDataFood.err){
                 return res.status(200).json({
                     error: false,
                     msg:'Sucesso no update',
+                    data: {id,...data}
                     // data: newDataFood.return
                 });
             }else{
