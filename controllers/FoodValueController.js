@@ -63,8 +63,5 @@ class FoodValueController{
         }
           
     }
-
-    
-
 }
 module.exports = new FoodValueController();

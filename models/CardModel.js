@@ -5,7 +5,7 @@ const UserModel = require('./UserModel')
 
 const moneyOperations = require('../utils/moneyOperations/math')
 const convertMonetaryValue = require('../utils/moneyOperations/convertMonetaryValue');
-const { cloudfunctions } = require('googleapis/build/src/apis/cloudfunctions');
+
 
 class CardModel{
 
@@ -72,38 +72,21 @@ class CardModel{
 
         }
     }
-    async showCard(matriculation,cod_ru){
+    
+    async showDataCard(matriculation,cod_ru){
 
         try{
-            const currentCardValue = await knex.select("value").where({matriculation,cod_ru}).table("ru_food_card");
-            
-            //Converter para forma adequada para trabalhar com dinheiro
-            if(currentCardValue.length == 0 ){
+            const dataCard = await knex.select().where({matriculation,cod_ru}).table("ru_food_card");
+            if(dataCard.length == 0 ){
                 return {err: true, return: [], msg:"Não encontrado"};  
-             }
-             
-            
-            const newFormatValueCard = convertMonetaryValue.stringToNumber(currentCardValue[0].value);
-            if(!newFormatValueCard.err){
-               
+            }
 
-               const newValueCard = newFormatValueCard.return
-               const resultOfTheOperation = moneyOperations.sub(newValueCard, 1.25);
-                
-   
-               console.log('Resultado da sub:', resultOfTheOperation);
-                if(!resultOfTheOperation.err){
-                    const valueToSendToDB = convertMonetaryValue.numberToString(resultOfTheOperation.return);
-                    console.log(valueToSendToDB)
-                    return {err: false, return: valueToSendToDB.return};  
+            if(!dataCard.err){
+                    return {err: false, return: dataCard[0]};  
 
                 }else{
                     return {err: true, return: []};  
                 }
-
-           }else{
-                return {err: true, return: []};  
-           } 
 
         }catch{
             return {err: true, return: err};  
