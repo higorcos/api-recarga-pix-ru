@@ -9,34 +9,6 @@ const convertMonetaryValue = require('../utils/moneyOperations/convertMonetaryVa
 
 class CardModel{
 
-    async insert(matriculation){
-        try{
-            const verifyUser = await UserModel.verify(matriculation);
-            const cod_ru = numberCardRU.new();
-
-            await knex.insert({matriculation, cod_ru}).table("ru_food_card");
-            return {err: false, return: {cod_ru}}
-
-        }catch(err){
-            // console.log("\n\n\n - Error: \n",err,"\n\n\n")
-            return {err: true, return: err}
-        }
-    }
-    async selectById(email){
-        try{
-            const resultSelect = await knex.select("*").from('users').where({email});
-
-            if(resultSelect.length > 0){
-                return true; //Já existe
-            }else{
-                return false;
-            }
-        }catch(err){
-            console.log("\n\n\n - Error: \n",err,"\n\n\n");
-            return false;
-        }
-    }
-      //#Vai sair
     async updatedValue(matriculation,cod_ru,newValue){
         try{
                 await knex.update({value:newValue}).where({matriculation,cod_ru}).table("ru_food_card");
@@ -72,7 +44,6 @@ class CardModel{
 
         }
     }
-    
     async showDataCard(matriculation,cod_ru){
 
         try{
@@ -92,32 +63,6 @@ class CardModel{
             return {err: true, return: err};  
 
         }
-    }
-    
-    async delete(user){
-
-    //verificar se usuário existe 
-
-    const checkingExistsUser = await this.findById(user.id);
-    if(!checkingExistsUser.err){
-
-
-            if(user.card == undefined){
-                return {err: true, return: {msg: 'Não informado'}};
-            }else{
-
-            try{
-                
-                const resultUpdate = await knex.where({matriculation:user.id}).update({cod_ru:user.card}).table('users');
-                return {err: false, return: resultUpdate};
-
-            }catch(err){
-                return {err: true, return: err};
-            }
-        }
-    }else{
-        return  {err:true, return:[], msgErr:'Usuário não existe' }
-    }
     }
 }
 module.exports = new CardModel();
