@@ -16,7 +16,7 @@ class Math{
             
         }else{
             
-            return {err: true, return: []};  
+            return {err: true, return: [], msg:`Saldo Negativo`};  
 
         }
 
