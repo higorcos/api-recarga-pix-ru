@@ -55,13 +55,10 @@ class CardController{
             });
         }
     }
-    //@@@ Validar Numero de Cartão (YUP)
     //@@@ Validar pagamento
-    //@@@ configurar variaveis Depois da verificação
     async addAndUpdate(req,res){
             const data = req.body;
-            const {matriculation, cod_ru,recharge_value} = req.body
-           
+            const {matriculation, cod_ru,recharge_value} = data
 
             const schema = yup.object({
                 matriculation: 
@@ -87,15 +84,8 @@ class CardController{
             });
             
             try{
-                const a = await schema.validate(data)
-                // console.log(a)
-
-                // return res.status(200).json({
-                //     error: false,
-                //     msg:'',
-                    
-                    
-                // });
+                await schema.validate(data)
+              
             }catch(err){
                 console.log(err)
                 return res.status(400).json({
@@ -113,22 +103,13 @@ class CardController{
 
             //buscar valor atual do cartão
             const currentCardValue = await CardModel.showValueCard(matriculation,cod_ru);
-
-            const currentFoodValue = await FoodValueModel.checkValue(); 
-            // const currentFoodValue = await CardModel.showDataCard(matriculation,cod_ru);
-            // console.log(currentFoodValue,'Valor  Comida atual')    
+ 
 
             
             console.log(currentCardValue ,'EEE')
             if(!currentCardValue.err){
                 
 
-                // if(currentFoodValue.err){
-                //     return res.status(404).json({
-                //         error: true,
-                //         msg:'Erro na operação, Valor comida',                        
-                //     });
-                // }
                 const resultOfTheOperation = moneyOperations.sum(currentCardValue.return, newFormatRecharge_value.return); //somar os valo atual com a recarga
 
                 if(resultOfTheOperation.err){
@@ -179,6 +160,100 @@ class CardController{
            
                 
     }
+    async subtractAndUpdate(req,res){
+        const data = req.body;
+        const {matriculation, cod_ru} = data
 
+        const schema = yup.object({
+            matriculation: 
+                yup.string()
+                .required(), 
+            cod_ru: 
+                yup.string()
+                .required(),
+        });
+        
+        try{
+           await schema.validate(data)
+        }catch(err){
+            console.log(err)
+            return res.status(400).json({
+                error: true,
+                msg:'Erro no envio dos parâmetros',
+                dataError: err.errors
+                
+            });
+        }
+        
+    try{
+
+        //buscar valor atual do cartão
+        const currentCardValue = await CardModel.showValueCard(matriculation,cod_ru);
+        // console.log(currentCardValue,'Valor  Card atual')    
+
+
+        const currentFoodValue = await FoodValueModel.checkValue(); 
+        // console.log(currentFoodValue,'Valor  Comida atual')    
+
+        
+        if(!currentCardValue.err){
+            
+
+            if(currentFoodValue.err){
+                return res.status(404).json({
+                    error: true,
+                    msg:'Erro na leitura do valor comida',                        
+                });
+            }
+            const resultOfTheOperation = moneyOperations.sub(currentCardValue.return, currentFoodValue.return); //subtrair os valo atual da refeição com o valor da carteira
+
+            if(resultOfTheOperation.err){
+                return res.status(404).json({
+                    error: true,
+                    msg:'Erro na operação',
+                    msgErr:resultOfTheOperation
+                });
+                
+            }else{
+
+                const valueToSendToDB = convertMonetaryValue.numberToString(resultOfTheOperation.return);
+                
+                const resultUpdated = await CardModel.updatedValue(matriculation, cod_ru,valueToSendToDB.return);
+                // console.log(resultUpdated)
+                if(!resultUpdated.err){
+                    return res.status(200).json({
+                        error: false,
+                        msg:'Suceeso no updated',
+                        data: {newValue:valueToSendToDB.return}
+                    });
+                }else{
+                    return res.status(404).json({
+                        error: true,
+                        msg:'Erro no updateValue, valor não encontrado',
+                        
+                    });
+                }
+            }
+        }else{
+            return res.status(404).json({
+                error: true,
+                msg:'Erro no updateValue, Valor do Cartão apresentou erro',
+                
+            });
+        }
+
+       
+    }catch{
+        return res.status(400).json({
+            error: true,
+            msg:'Erro, updateValue',
+            
+        });
+    }
+    
+       
+       
+            
+    }
 }
 module.exports = new CardController();
