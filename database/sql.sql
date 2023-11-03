@@ -56,6 +56,30 @@ CREATE TABLE IF NOT EXISTS public.ru_food_value
 
 /* Até aqui foi feito novamente*/
 
+
+CREATE TABLE IF NOT EXISTS public.ru_order_status_type
+(
+    id_order_status_type serial NOT NULL PRIMARY KEY,
+    name character varying(30) NOT NULL,
+    description character varying(100),
+    created_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS public.ru_type_order
+(
+    id_type_order serial NOT null PRIMARY KEY,
+    name character varying(30) NOT NULL,
+    description character varying(100),
+    percentage_rate numeric NOT NULL DEFAULT 0,
+    flat_rate numeric NOT NULL DEFAULT 0,
+    created_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+/* Até aqui foi feito novamente  03/11/2023*/
+
 CREATE TABLE IF NOT EXISTS public.purchase_order
 (
     id_request character varying(64) NOT NULL,
@@ -69,25 +93,6 @@ CREATE TABLE IF NOT EXISTS public.purchase_order
     updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     value numeric NOT NULL,
     PRIMARY KEY (id_user, id_request)
-);
-
-CREATE TABLE IF NOT EXISTS public.status_order
-(
-    id_status_order serial NOT NULL PRIMARY KEY,
-    name character varying(30) NOT NULL,
-    description character varying(100)
-);
-
-CREATE TABLE IF NOT EXISTS public.type_order
-(
-    "idTypeOrder" serial NOT NULL,
-    name character varying(30) NOT NULL,
-    description character varying(100),
-    percentage_rate numeric NOT NULL DEFAULT 0,
-    flat_rate numeric NOT NULL DEFAULT 0,
-    created_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ("idTypeOrder")
 );
 
 CREATE TABLE IF NOT EXISTS public.movement_history
