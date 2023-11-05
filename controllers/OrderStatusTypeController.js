@@ -63,14 +63,11 @@ class OrderStatusTypeController{
           
     }
     async updated(req,res){
-
+        const {id} = req.params;
         const data = req.body;
         
 
         const schema = yup.object({
-            id: 
-                yup.number()
-                .required(), 
             name: 
                 yup.string()
                 .required(), 
@@ -78,8 +75,7 @@ class OrderStatusTypeController{
                 yup.string()
                 .required(),
         });
-        const {id, name, description} = data;
-        console.log(id)
+        const { name, description} = data;
 
         try{
             await schema.validate(data)
