@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS public.ru_type_order
     name character varying(30) NOT NULL,
     description character varying(100),
     percentage_rate numeric NOT NULL DEFAULT 0,
-    flat_rate numeric NOT NULL DEFAULT 0,
+    flat_rate money NOT NULL DEFAULT '00',
     created_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
