@@ -1,7 +1,7 @@
-const knex = require('../database/connection');
+const knex = require('../../database/connection');
 
-const moneyOperations = require('../utils/moneyOperations/math')
-const convertMonetaryValue = require('../utils/moneyOperations/convertMonetaryValue');
+const moneyOperations = require('../../utils/moneyOperations/math')
+const convertMonetaryValue = require('../../utils/moneyOperations/convertMonetaryValue');
 
 
 class OrderStatusTypeModel{

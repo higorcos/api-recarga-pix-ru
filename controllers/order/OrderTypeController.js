@@ -1,9 +1,9 @@
-const OrderTypeModel = require('../models/OrderTypeModel');
+const OrderTypeModel = require('../../models/order/OrderTypeModel');
 
 const yup = require('yup');
 
-const moneyOperations = require('../utils/moneyOperations/math')
-const convertMonetaryValue = require('../utils/moneyOperations/convertMonetaryValue');
+const moneyOperations = require('../../utils/moneyOperations/math')
+const convertMonetaryValue = require('../../utils/moneyOperations/convertMonetaryValue');
 
 
 

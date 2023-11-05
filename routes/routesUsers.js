@@ -4,7 +4,6 @@ const AdminAuth = require('../middleware/admin/AdminAuth');
 const AllAuth = require('../middleware/secondary/allAuth');
 const TokenVerification = require('../middleware/secondary/DefaultAuth');
 const UserController = require('../controllers/UserController')
-const HomeController = require('../controllers/HomeController')
 
 
 router.post('/login', UserController.login);
@@ -21,6 +20,11 @@ router.get('/recovery-password/:token', (req,res)=>{
 });
 
 
-router.get('/', HomeController.index);
+router.get('/', (req,res)=>{
+    res.status(200).json({
+        error: false,
+        msg:'Sucesso, Home',
+    })
+});
 
 module.exports = router;

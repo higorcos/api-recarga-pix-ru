@@ -1,7 +1,7 @@
-const OrderStatusTypeModel = require('../models/OrderStatusTypeModel');
+const OrderStatusTypeModel = require('../../models/order/OrderStatusTypeModel');
 
-const moneyOperations = require('../utils/moneyOperations/math')
-const convertMonetaryValue = require('../utils/moneyOperations/convertMonetaryValue');
+const moneyOperations = require('../../utils/moneyOperations/math')
+const convertMonetaryValue = require('../../utils/moneyOperations/convertMonetaryValue');
 // const { v4: uuidv4 } = require('uuid');
 // uuidv4();
 

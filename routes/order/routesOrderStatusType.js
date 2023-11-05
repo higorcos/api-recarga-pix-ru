@@ -1,9 +1,9 @@
 const express = require("express")
 const router = express.Router();
-const AdminAuth = require('../middleware/admin/AdminAuth');
-const AllAuth = require('../middleware/secondary/allAuth');
-const TokenVerification = require('../middleware/secondary/DefaultAuth');
-const OrderStatusTypeController = require('../controllers/OrderStatusTypeController')
+const AdminAuth = require('../../middleware/admin/AdminAuth');
+const AllAuth = require('../../middleware/secondary/allAuth');
+const TokenVerification = require('../../middleware/secondary/DefaultAuth');
+const OrderStatusTypeController = require('../../controllers/order/OrderStatusTypeController')
 
 
 router.post('/order-status-type', OrderStatusTypeController.created); //Criar Status
