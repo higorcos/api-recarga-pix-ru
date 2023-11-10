@@ -80,21 +80,25 @@ CREATE TABLE IF NOT EXISTS public.ru_type_order
 
 /* Até aqui foi feito novamente  03/11/2023*/
 
-CREATE TABLE IF NOT EXISTS public.purchase_order
+CREATE TABLE IF NOT EXISTS public.ru_purchase_order
 (
-    id_request character varying(64) NOT NULL,
-    id_user character varying(64) NOT NULL,
-    name character varying(20) NOT NULL,
-    description character varying(50),
+    devedor_txid character varying(64) NOT NULL PRIMARY KEY ,
+    matriculation character varying(64) NOT NULL ,
+    loc numeric NOT NULL,
+ 
+   devedor_cpf character varying(64) NOT NULL,
+    devedor_location character varying(64) NOT NULL,
+    devedor_valor money NOT NULL,
+    devedor_data_criacao character varying(64) NOT NULL,
+    pagamento_data timestamp without time zone,
+    pagamento_endToEndId character varying(64),
     status integer NOT NULL,
     type integer NOT NULL,
-    expiration timestamp without time zone NOT NULL,
     created_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expiration timestamp without time zone NOT NULL,
     updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    value numeric NOT NULL,
-    PRIMARY KEY (id_user, id_request)
+    CONSTRAINT fk_user_purchase_order FOREIGN KEY (matriculation) REFERENCES users(matriculation)
 );
-
 CREATE TABLE IF NOT EXISTS public.movement_history
 (
     "idPurchaseOrder" character varying(64) NOT NULL,
