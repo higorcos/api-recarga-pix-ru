@@ -4,7 +4,7 @@ const moneyOperations = require('../../utils/moneyOperations/math')
 const convertMonetaryValue = require('../../utils/moneyOperations/convertMonetaryValue');
 
 
-class OrderStatusTypeModel{
+class PurchaseOrderModel{
     async created(
         matriculation,
         devedor_txid,	
@@ -86,4 +86,4 @@ class OrderStatusTypeModel{
     //     }
     // }
 }
-module.exports = new OrderStatusTypeModel();
+module.exports = new PurchaseOrderModel();
