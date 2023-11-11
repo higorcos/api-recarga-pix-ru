@@ -1,17 +1,19 @@
 const PurchaseOrderModel = require('../../models/order/PurchaseOrderModel');
+const UserModel = require('../../models/UserModel');
+const {createBilling} = require('../../apis/apiPix/featuresApiPix')
 
-const yup = require('yup');
+
 
 const moneyOperations = require('../../utils/moneyOperations/math')
 const convertMonetaryValue = require('../../utils/moneyOperations/convertMonetaryValue');
-
-// const { v4: uuidv4 } = require('uuid');
-// uuidv4();
+const yup = require('yup');
 
 class PurchaseOrderController{
     async created(req,res){
+        //Verificar se tem Pedidos em aberto
 
         const data = req.body;
+        let dataResponse = {}
        
 
         const schema = yup.object({
@@ -21,242 +23,119 @@ class PurchaseOrderController{
             recharge_value:
                 yup.string()
                 .required()
-                .test("success", "Erro, o parâmetro '${path}' está fora do formato. Exemplo:'${path}': '1.123,00'. O valor deve ser uma string e casa decimal deve ser separado por vírgula", (value) =>{
-
-                    const regex = /,\d{2}$/;
+                .test("success", "Erro, o parâmetro '${path}' está fora do formato. Exemplo:'${path}': '1123.00'. O valor deve ser uma string e casa decimal deve ser separado por ponto", (value) =>{
+                
+                    const regex = /^[0-9]{1,10}\.[0-9]{2}$/;
                     const resultString = regex.test(value);
-                    // console.log(resultString)
+                  
                     if(resultString){
                         return true;
                     }else{
                         return false;
                     }
-                }),
+            })
         });
 
-        const {matriculation, recharge_value} = data;
-
+        
+        //@@Validação
         try{
             await schema.validate(data)        
         }catch(err){
-            console.log(err)
             return res.status(400).json({
                 error: true,
                 msg:'Erro no envio dos parâmetros',
                 dataError: err.errors
-                
             });
         }
 
+        const {matriculation, recharge_value} = data;
+        //@@buscar nome e cpf
+        
+
         try{
+            const newData = await UserModel.findById(matriculation);
+            console.log(newData)
 
-            //Nome e CPF trazer do DB
-
-            const reqAPI = {
-                calendario: {
-                    expiracao: 3600 //tempo de expiração em segundos 3600 = 60 minutos
-                },
-                devedor: {
-                    cpf: "12345678909",
-                    nome: "Fulano de Tal" 
-                },
-                valor: {
-                    original: "0.05"//Valor Cobrança
-                },
-                chave: "00000000-0000-0000-0000-000000000000",//chave efi
-                solicitacaoPagador: "Cobrança dos serviços prestados." //msg
-            }
-
-            //RES_API
-            // const new_percentage_rate = convertMonetaryValue.stringToNumber(percentage_rate);
-            const devedor_txid = "34y4874g8yg4y8864g8yg4984yg479y8";
-            const devedor_loc = 654;
-            const devedor_cpf = "12345678909"; //Adicionar do form ou trazer de um select no user        
-            //CPF e NOME DO USUÁRIO                                                                                                                       
-            const devedor_location = "https://chat.com";	
-            const devedor_valor = "20,01";	
-            const devedor_data_criacao = "2023-11-03 16:51:25.057";	
-
-            const expiration = "2023-11-03 16:51:25.057"; // pegar os milesegundos e somar com data de criação para pegar data no futuro  
-
-            //O valor vem pelo form mas vai 
-
-            const newData = await PurchaseOrderModel.created(
-                matriculation,
-                devedor_txid,	
-                devedor_loc,
-                devedor_cpf,
-                devedor_location,	
-                devedor_valor,	
-                devedor_data_criacao,	
-                expiration);
-            
-                // console.log(newData)
-            if(!newData.err){
-                return res.status(200).json({
-                    error: false,
-                    msg:'Sucesso no update',
-                    data
-                });
-            }else{
+            if(newData.err){
                 return res.status(404).json({
                     error: true,
-                    msg:'Erro no update dos dados - ru_order_type',
+                    msg:'Erro, Na verificação do usuário',
+                    err: newData
                 });
             }
+            dataResponse = {...dataResponse, 'user': { 'nome': newData.return[0].name, 
+                    'cpf': newData.return[0].cpf}}
+
 
         }catch(err){
             return res.status(404).json({
                 error: true,
-                msg:'Erro no update dos dados - ru_order_type',
+                msg:'Erro, Acesso a API PIX',
+                msgErr: err
+            });
+        }
+        
+        //@@ Acessar Api PIX e criar cobrança
+        try{
+
+            const nome = dataResponse.user.nome;
+            const cpf = dataResponse.user.cpf;
+            console.log(nome,cpf)
+
+            const newData = await createBilling({nome,cpf, valor: recharge_value})
+            console.log(newData)
+            if(newData.error){
+                return res.status(404).json({
+                    error: true,
+                    msg:'Erro, Criação de Cobrança API PIX',
+                    err: newData
+                });
+            }
+            dataResponse = {...dataResponse, dataBilling:newData.data}
+
+        }catch(err){
+            return res.status(404).json({
+                error: true,
+                msg:'Erro, Acesso a API PIX',
+                msgErr: err
+            });
+        }
+
+        //@@Salvar Ordem de compra 
+        try{
+            
+            const newData = await PurchaseOrderModel.created(
+                matriculation,
+                dataResponse.dataBilling.devedor_txid,	
+                dataResponse.dataBilling.devedor_loc,
+                dataResponse.dataBilling.devedor_cpf,
+                dataResponse.dataBilling.devedor_location,	
+                dataResponse.dataBilling.devedor_valor,	
+                dataResponse.dataBilling.devedor_data_criacao,	
+                dataResponse.dataBilling.expiration);
+          
+            if(newData.err){
+                return res.status(404).json({
+                    error: true,
+                    msg:'Erro, insert cobrança no bando de dados',
+                    err: newData.return
+                });
+            }
+        }catch(err){
+            return res.status(404).json({
+                error: true,
+                msg:'Erro, sql insert cobrança no bando de dados',
                 msgErr: err
             });
         }
           
+        //QRCODE
+        return res.json({res:dataResponse})
+        // return res.send(`<div class="boxQrcode">
+        // <h3>QRCODE</h3>
+        // <img src=${dataResponse.dataBilling.qrcode} alt="" srcset="">
+        // </div>`)
+           
     }
-    // async updated(req,res){
-    //     const {id} = req.params;
-
-    //     const data = req.body;
-        
-
-    //     const schema = yup.object({
-    //         name: 
-    //             yup.string()
-    //             .required(), 
-    //         description: 
-    //             yup.string()
-    //             .required(),
-    //         percentage_rate:
-    //             yup.string()
-    //             .required()
-    //             .test("success", "Erro, o parâmetro '${path}' está fora do formato. Exemplo:'${path}': '1.123,00'. O valor deve ser uma string e casa decimal deve ser separado por vírgula", (value) =>{
-
-    //                 const regex = /,\d{2}$/;
-    //                 const resultString = regex.test(value);
-    //                 // console.log(resultString)
-    //                 if(resultString){
-    //                     return true;
-    //                 }else{
-    //                     return false;
-    //                 }
-    //             }),
-    //         flat_rate:
-    //             yup.string()
-    //             .required()
-    //             .test("success", "Erro, o parâmetro '${path}' está fora do formato. Exemplo:'${path}': '1.123,00'. O valor deve ser uma string e casa decimal deve ser separado por vírgula", (value) =>{
-
-    //                 const regex = /,\d{2}$/;
-    //                 const resultString = regex.test(value);
-    //                 // console.log(resultString)
-    //                 if(resultString){
-    //                     return true;
-    //                 }else{
-    //                     return false;
-    //                 }
-    //             })
-    //     });
-    //     const {name, description,percentage_rate,flat_rate} = data;
-       
-
-    //     try{
-    //         await schema.validate(data)
-          
-    //     }catch(err){
-    //         console.log(err)
-    //         return res.status(400).json({
-    //             error: true,
-    //             msg:'Erro no envio dos parâmetros',
-    //             dataError: err.errors
-                
-    //         });
-    //     }
-
-    //     try{
-            
-    //         const newData = await PurchaseOrderModel.updated(id,name,description,percentage_rate,flat_rate);
-            
-    //             console.log(newData)
-    //         if(!newData.err){
-    //             return res.status(200).json({
-    //                 error: false,
-    //                 msg:'Sucesso no update',
-    //                 data
-    //             });
-    //         }else{
-    //             return res.status(404).json({
-    //                 error: true,
-    //                 msg:'Erro no update dos dados - ru_order_type',
-    //             });
-    //         }
-
-    //     }catch(err){
-    //         return res.status(404).json({
-    //             error: true,
-    //             msg:'Erro no update dos dados - ru_order_type',
-    //             msgErr: err
-    //         });
-    //     }
-          
-    // }
-    // async listAll(req,res){
-
-        
-    //     try{
-    //         const data = await PurchaseOrderModel.listAll();
-            
-           
-    //         if(!data.err){
-    //             return res.status(200).json({
-    //                 error: false,
-    //                 msg:'Sucesso na listagem',
-    //                 data: data.return
-    //             });
-    //         }else{
-    //             return res.status(404).json({
-    //                 error: true,
-    //                 msg:'Erro na Listagem dos dados - ru_order_type',
-    //             });
-    //         }
-
-    //     }catch(err){
-    //         return res.status(404).json({
-    //             error: true,
-    //             msg:'Erro na Listagem dos dados - ru_order_type',
-    //             msgErr: err
-    //         });
-    //     }
-           
-    // }
-    // async listById(req,res){
-    //     const {id} = req.params;
-
-        
-    //     try{
-    //         const data = await PurchaseOrderModel.listById(id);
-            
-           
-    //         if(!data.err){
-    //             return res.status(200).json({
-    //                 error: false,
-    //                 msg:'Sucesso na listagem',
-    //                 data: data.return
-    //             });
-    //         }else{
-    //             return res.status(404).json({
-    //                 error: true,
-    //                 msg:'Erro na Listagem dos dados - ru_order_type',
-    //             });
-    //         }
-
-    //     }catch(err){
-    //         return res.status(404).json({
-    //             error: true,
-    //             msg:'Erro na Listagem dos dados - ru_order_type',
-    //             msgErr: err
-    //         });
-    //     }
-           
-    // }
 }
 module.exports = new PurchaseOrderController();

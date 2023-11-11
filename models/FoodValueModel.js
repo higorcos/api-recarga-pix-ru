@@ -26,7 +26,7 @@ class FoodValueModel{
     }
     async updated(id,name,description,value){
         try{
-
+            
             const result = await knex.update({name,description,value}).where({id}).table("ru_food_value");
             
             return {err: false , return: result};  

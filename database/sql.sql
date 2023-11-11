@@ -99,6 +99,10 @@ CREATE TABLE IF NOT EXISTS public.ru_purchase_order
     updated timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_purchase_order FOREIGN KEY (matriculation) REFERENCES users(matriculation)
 );
+
+
+
+
 CREATE TABLE IF NOT EXISTS public.movement_history
 (
     "idPurchaseOrder" character varying(64) NOT NULL,

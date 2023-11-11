@@ -71,46 +71,41 @@ async createBilling(data){
         
         console.log('Nova cobrança');
 
+        const devedor_data_criacao = responseNewCob['data']['calendario']['criacao']
+        //Horário de expiração (Convertendo)
+        let expiration = responseNewCob['data']['calendario']['expiracao']
+        const horarioOriginal = new Date(responseNewCob['data']['calendario']['criacao']);
+        horarioOriginal.setSeconds(horarioOriginal.getSeconds() + 3600);
+        expiration = horarioOriginal.toISOString();
+
+
         return {
             error: false, 
             msg: 'Sucesso',
-            importantData: { 
+            data: { 
                 devedor_txid:responseNewCob['data']['txid'],
                 devedor_cpf:responseNewCob['data']['devedor']['cpf'],
                 devedor_nome:responseNewCob['data']['devedor']['nome'],
                 devedor_loc:responseNewCob['data']['loc']['id'],
                 devedor_location:responseNewCob['data']['loc']['location'],
                 devedor_valor:responseNewCob['data']['valor']['original'],
-                expiration:responseNewCob['data']['calendario']['expiracao'],
-                devedor_data_criacao:responseNewCob['data']['calendario']['criacao'],
+                // expirationSeconds:responseNewCob['data']['calendario']['expiracao'],
+                expiration:expiration,
+                devedor_data_criacao: devedor_data_criacao,
+                qrcode:responseQRcode.data.imagemQrcode,
             },
              
-            allData: {...responseNewCob.data,QRcode:responseQRcode.data.imagemQrcode}
+            // allData: {...responseNewCob.data}
         }
             
     }catch(err){
         return {
-            error: false, 
+            error: true, 
             msgErro: `Erro na criação de nova cobrança`, 
             err:err}
     }
 }
-async listBilling (req,res){
-    const apiPix = await pixRequest();
-    try{
-        
-        const listCob = await apiPix.get('/v2/cob?inicio=2023-08-22T00:00:00Z&fim=2023-12-30T00:00:00Z');
-        res.json(listCob.data);
-            
-    }catch(err){
-        res.json({err:true, msgErro: `Erro na listagem das cobrança`,err:err});
-    }
 
-}
-webhook(req,res){
-    console.log(req.body);
-    res.send('200');
-}
 }
 
 module.exports = new apiPixFeatures();

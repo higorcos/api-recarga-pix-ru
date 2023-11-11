@@ -16,9 +16,16 @@ class PurchaseOrderModel{
         expiration,
         ){
         const type = 1;
-        const status = 1;	
+        const status = 0;	
 
         try{
+            let newFormatValue = convertMonetaryValue.numberToString(devedor_valor)
+            if(newFormatValue.err){
+                return {err: true , return: result};  
+            }
+            newFormatValue = newFormatValue.return 
+            console.log(newFormatValue)
+           
 
             const result = await knex.insert({
                 matriculation,
@@ -26,7 +33,7 @@ class PurchaseOrderModel{
                 devedor_loc,
                 devedor_cpf,
                 devedor_location,	
-                devedor_valor,	
+                devedor_valor:newFormatValue,	
                 devedor_data_criacao,	
                 expiration,
                 status,
@@ -40,50 +47,5 @@ class PurchaseOrderModel{
             return {err: true, return: err}
         }
     }
-    // async updated(id_order_status_type,name,description){
-    //     try{
-
-    //         const result = await knex.update({name,description})
-    //                 .where({id_order_status_type})
-    //                 .table("ru_purchase_order");
-            
-    //         return {err: false , return: result};  
-            
-    //     }catch(err){
-
-    //         return {err: true, return: err}
-    //     }
-    // }
-    // async listAll(){
-    //     try{
-
-    //         let result = await knex.select().table("ru_purchase_order");
-        
-
-    //         if(!result.err){
-    //                 return {err: false, return: result};  
-    //             }else{
-    //                 return {err: true, return: []};  
-    //             }
-    //     }catch(err){
-    //         return {err: true, return: err}
-    //     }
-    // }
-    // async listById(id_order_status_type){
-    //     console.log(id_order_status_type)
-    //     try{
-
-    //         let result = await knex.select().where({id_order_status_type}).table("ru_purchase_order");
-        
-
-    //         if(!result.err){
-    //                 return {err: false, return: result};  
-    //             }else{
-    //                 return {err: true, return: []};  
-    //             }
-    //     }catch(err){
-    //         return {err: true, return: err}
-    //     }
-    // }
 }
 module.exports = new PurchaseOrderModel();

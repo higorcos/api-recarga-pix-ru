@@ -48,7 +48,7 @@ class UserModel{
     async findById(matriculation){
         
         try{
-            const resultSelect = await knex.select('users.matriculation', 'users.name', 'users.email', 'users.role','ru_food_card.*').table('users').fullOuterJoin('ru_food_card','ru_food_card.matriculation','users.matriculation').where({'users.matriculation' :matriculation});
+            const resultSelect = await knex.select('users.matriculation', 'users.name', 'users.email', 'users.role','users.cpf','ru_food_card.*').table('users').fullOuterJoin('ru_food_card','ru_food_card.matriculation','users.matriculation').where({'users.matriculation' :matriculation});
 
             if(resultSelect.length > 0){
                 
