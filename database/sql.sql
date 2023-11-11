@@ -105,14 +105,13 @@ CREATE TABLE IF NOT EXISTS public.ru_purchase_order
 
 CREATE TABLE IF NOT EXISTS public.movement_history
 (
-    "idPurchaseOrder" character varying(64) NOT NULL,
-    "idMovement" serial NOT NULL,
+    "idPurchaseOrder" character varying(64) NOT NULL PRIMARY KEY,
     "idFoodCard" character varying(64) NOT NULL,
     "typeMovement" integer NOT NULL,
     value numeric NOT NULL,
     created_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_on timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ("idMovement", "idPurchaseOrder")
+    CONSTRAINT fk_typeMovement_order FOREIGN KEY (typeMovement) REFERENCES typeMovement("idTypeMovement")
 );
 
 CREATE TABLE IF NOT EXISTS public."typeMovement"

@@ -47,5 +47,17 @@ class PurchaseOrderModel{
             return {err: true, return: err}
         }
     }
+    async findById(devedor_txid){
+     
+        try{
+            const result = await knex.select('*').where({devedor_txid, status: 0}).table("ru_purchase_order");
+            
+            return {err: false , return: result};  
+            
+        }catch(err){
+
+            return {err: true, return: err}
+        }
+    }
 }
 module.exports = new PurchaseOrderModel();
