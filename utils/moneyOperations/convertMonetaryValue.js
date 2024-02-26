@@ -5,11 +5,11 @@ class ConverterMoney{
         if(value == undefined){
             return {err: true, return: []};  
         }else{
-
+            console.log(value)
             // Remover pontos e substituir a vírgula por ponto
             const newValue = value.replace('R$','').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
             
-            // console.log(newValue);
+            console.log(newValue);
             return {err: false, return: newValue};  
 
         }

@@ -10,15 +10,16 @@ const convertMonetaryValue = require('../../utils/moneyOperations/convertMonetar
 
 class MovementHistoryController{
     async recharge(req,res){
-        const txid =  'b4031342699d475094a760e902ea03ef'
+        const {txid} =  req.params
+        console.log('aa')
         try{
             const newData = await MovementHistoryModel.transactionRecharge(txid);
-            return res.json({res:newData,'1':'1'}) 
+            return res.json({res:newData,"PAGAMENTO REALIZADO":""}) 
 
         }catch(err){
             return res.status(400).json({
                 error: true,
-                msg:'Erro no envio dos parâmetros',
+                msg:'Error transaction',
                 dataError: err.errors
             });
         }

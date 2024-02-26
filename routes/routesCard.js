@@ -7,6 +7,7 @@ const CardController = require('../controllers/CardController')
 
 
 router.post('/card', CardController.created);
+router.post('/card/info', CardController.show);
 router.patch('/card/add', CardController.addAndUpdate);
 router.patch('/card/subtract', CardController.subtractAndUpdate); 
 

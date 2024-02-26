@@ -16,7 +16,7 @@ class CardController{
             const validationUser = await UserModel.findById(matriculation);
            
             if(!validationUser.err){
-
+                //Erro AQUI
                 const resultInsert = await CardModel.insert(matriculation);
                 
                 
@@ -254,6 +254,40 @@ class CardController{
        
        
             
+    }
+    async show(req,res){
+        const {cod_ru, matriculation} = req.body
+
+        if(cod_ru !== undefined){
+           
+            const result = await CardModel.showDataCard(matriculation,cod_ru);
+                
+            
+            if(!result.err){
+                return res.status(200).json({
+                    error: false,
+                    msg:'Sucesso na listagem',
+                    data: result.return, 
+                });
+            }else{
+                return res.status(400).json({
+                    error: true,
+                    msg:'Erro na listagem',
+                    data: req.body,
+                    msgErr:
+                    {sqlState: result.return.sqlState,
+                    sqlMessage: result.return.sqlMessage,}
+                });
+            }
+           
+        }else{
+            return res.status(422).json({
+                error: true,
+                msg:'Validation Failed',
+                field : ["cod_ru" , "matricula"]
+                
+            });
+        }
     }
 }
 module.exports = new CardController();
