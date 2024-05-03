@@ -1,12 +1,12 @@
 const PurchaseOrderModel = require('../../models/order/PurchaseOrderModel');
 const UserModel = require('../../models/UserModel');
-const {createBilling} = require('../../apis/apiPix/featuresApiPix')
+const {createBilling,searchQRcode} = require('../../apis/apiPix/featuresApiPix')
 
 
 
 const moneyOperations = require('../../utils/moneyOperations/math')
 const convertMonetaryValue = require('../../utils/moneyOperations/convertMonetaryValue');
-const yup = require('yup');
+const yup = require('yup'); 
 
 class PurchaseOrderController{
     async created(req,res){
@@ -54,7 +54,6 @@ class PurchaseOrderController{
 
         try{
             const newData = await UserModel.findById(matriculation);
-            console.log(newData)
 
             if(newData.err){
                 return res.status(404).json({
@@ -80,10 +79,10 @@ class PurchaseOrderController{
 
             const nome = dataResponse.user.nome;
             const cpf = dataResponse.user.cpf;
-            console.log(nome,cpf)
+            
 
             const newData = await createBilling({nome,cpf, valor: recharge_value})
-            console.log(newData)
+            
             if(newData.error){
                 return res.status(404).json({
                     error: true,
@@ -103,7 +102,7 @@ class PurchaseOrderController{
 
         //@@Salvar Ordem de compra 
         try{
-            
+           
             const newData = await PurchaseOrderModel.created(
                 matriculation,
                 dataResponse.dataBilling.devedor_txid,	
@@ -111,8 +110,11 @@ class PurchaseOrderController{
                 dataResponse.dataBilling.devedor_cpf,
                 dataResponse.dataBilling.devedor_location,	
                 dataResponse.dataBilling.devedor_valor,	
+                dataResponse.dataBilling.pagamento_cod_pix,
                 dataResponse.dataBilling.devedor_data_criacao,	
-                dataResponse.dataBilling.expiration);
+                dataResponse.dataBilling.expiration
+
+            );
           
             if(newData.err){
                 return res.status(404).json({
@@ -129,13 +131,74 @@ class PurchaseOrderController{
             });
         }
           
+        return res.json({res:dataResponse})      
+    }
+    async findQRcodeById(req,res){
+
+        const {matriculation, txid} = req.params;
+        
+        try{
+
+            const resultFindById = await PurchaseOrderModel.findById(matriculation,txid);
+            if(!resultFindById.err){
+                if(resultFindById.return.length !== 0){
+
+                    const loc = resultFindById.return[0]["devedor_loc"]
+                    const statusDB = resultFindById.return[0]["devedor_loc"]
+                    const resultSearchQRcode = await searchQRcode(loc);
+                    
+
+                    return res.status(200).json({
+                        error: false,
+                        msg:'Sucesso, listagem das cobranças',
+                        data: {...resultFindById.return[0],...resultSearchQRcode.data}
+                    });
+
+                }else{
+                    throw new Error("Nenhum Resultado");
+                }
+            }else{
+                throw new Error("Não foi encontrado o txid");
+            }
+            
+        }catch(error){
+            return res.status(404).json({
+                error: true,
+                msg:'Erro, listagem das cobranças',
+                msgErr: error.message
+            });
+        }
+                
+    }
+    async listAll(req,res){
+        
+
+        const {matriculation} = req.params;
+        let dataResponse = {}
+
+        //@@select
+        try{
+            
+            const newData = await PurchaseOrderModel.listAllMatriculation(matriculation)
+          
+            if(!newData.err){
+                return res.status(200).json({
+                    error: false,
+                    msg:'Sucesso, listagem das cobranças',
+                    data: newData.return
+                });
+            }
+        }catch(err){
+            return res.status(404).json({
+                error: true,
+                msg:'Erro, listagem das cobranças',
+                msgErr: err
+            });
+        }
+          
         //QRCODE
         return res.json({res:dataResponse})
-        // return res.send(`<div class="boxQrcode">
-        // <h3>QRCODE</h3>
-        // <img src=${dataResponse.dataBilling.qrcode} alt="" srcset="">
-        // </div>`)
-           
+          
     }
 }
 module.exports = new PurchaseOrderController();

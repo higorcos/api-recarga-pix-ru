@@ -7,8 +7,9 @@ const PurchaseOrderController = require('../../controllers/order/PurchaseOrderCo
 
 
 router.post('/purchase-order', PurchaseOrderController.created); //Criar
+router.get('/purchase-order/:matriculation', PurchaseOrderController.listAll); //Mostrar Informações de uma
+router.get('/purchase-order/:matriculation/:txid', PurchaseOrderController.findQRcodeById); //Verificar buscar qrcode mudar status se necessário
 // router.patch('/purchase-order/:id', PurchaseOrderController.updated); //Atualiza
-// router.get('/purchase-order', PurchaseOrderController.listAll); //Mostrar Informações de uma
 // router.get('/purchase-order/:id', PurchaseOrderController.listById); //Mostrar um 
 
 

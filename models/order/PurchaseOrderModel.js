@@ -12,8 +12,9 @@ class PurchaseOrderModel{
         devedor_cpf,
         devedor_location,	
         devedor_valor,	
+        pagamento_cod_pix,
         devedor_data_criacao,	
-        expiration,
+        expiration
         ){
         const type = 1;
         const status = 0;	
@@ -24,7 +25,6 @@ class PurchaseOrderModel{
                 return {err: true , return: result};  
             }
             newFormatValue = newFormatValue.return 
-            console.log(newFormatValue)
            
 
             const result = await knex.insert({
@@ -33,7 +33,8 @@ class PurchaseOrderModel{
                 devedor_loc,
                 devedor_cpf,
                 devedor_location,	
-                devedor_valor:newFormatValue,	
+                devedor_valor:newFormatValue,
+                pagamento_cod_pix,	
                 devedor_data_criacao,	
                 expiration,
                 status,
@@ -47,10 +48,10 @@ class PurchaseOrderModel{
             return {err: true, return: err}
         }
     }
-    async findById(devedor_txid){
+    async findById(matriculation, devedor_txid){
      
         try{
-            const result = await knex.select('*').where({devedor_txid, status: 0}).table("ru_purchase_order");
+            const result = await knex.select('*').where({matriculation, devedor_txid }).table("ru_purchase_order").innerJoin('ru_order_status_type', { 'status': 'id_order_status_type' });
             
             return {err: false , return: result};  
             
@@ -59,5 +60,18 @@ class PurchaseOrderModel{
             return {err: true, return: err}
         }
     }
+    async listAllMatriculation(matriculation){
+     
+        try{
+            const result = await knex.select('*').where({matriculation}).table("ru_purchase_order").innerJoin('ru_order_status_type', { 'status': 'id_order_status_type' });
+            
+            return {err: false , return: result};  
+            
+        }catch(err){
+
+            return {err: true, return: err}
+        }
+    }
+
 }
 module.exports = new PurchaseOrderModel();

@@ -72,12 +72,12 @@ async createBilling(data){
         console.log('Nova cobrança');
 
         const devedor_data_criacao = responseNewCob['data']['calendario']['criacao']
-        //Horário de expiração (Convertendo)
+        // Horário de expiração (Convertendo)
         let expiration = responseNewCob['data']['calendario']['expiracao']
         const horarioOriginal = new Date(responseNewCob['data']['calendario']['criacao']);
-        horarioOriginal.setSeconds(horarioOriginal.getSeconds() + 3600);
+        horarioOriginal.setSeconds(horarioOriginal.getSeconds() + expiration);
         expiration = horarioOriginal.toISOString();
-
+        
 
         return {
             error: false, 
@@ -89,7 +89,8 @@ async createBilling(data){
                 devedor_loc:responseNewCob['data']['loc']['id'],
                 devedor_location:responseNewCob['data']['loc']['location'],
                 devedor_valor:responseNewCob['data']['valor']['original'],
-                // expirationSeconds:responseNewCob['data']['calendario']['expiracao'],
+                pagamento_cod_pix:responseNewCob['data']['pixCopiaECola'],
+                pagamento_qrcode:responseNewCob['data']['pixCopiaECola'],
                 expiration:expiration,
                 devedor_data_criacao: devedor_data_criacao,
                 qrcode:responseQRcode.data.imagemQrcode,
@@ -103,6 +104,24 @@ async createBilling(data){
             error: true, 
             msgErro: `Erro na criação de nova cobrança`, 
             err:err}
+    }
+}
+async searchQRcode(idLocCob){
+    try{
+        const apiPix = await pixRequest(); //Pegar Novo Token 
+
+        const {data} = await apiPix.get(`/v2/loc/${idLocCob}/qrcode`)
+        return {
+            error: false, 
+            msg: 'Sucesso',
+            data,
+        }
+    }catch(err){
+        return {
+            error: true,
+            msg:'Erro, acesso a api de pagamento',
+            dataError: err.errors
+        }
     }
 }
 

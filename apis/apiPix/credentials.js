@@ -50,10 +50,10 @@ const pixRequest = async () =>{
     // try{
 
         const newToken = await getAccessToken();
-        console.log(newToken.data?.access_token);
+        // console.log(newToken.data?.access_token);
         
         const accessToken = newToken.data?.access_token;
-           console.log('Pegou novo token');
+           console.log('---------   Pegou novo token');
             
             return axios.create({
                 baseURL: process.env.EFI_ENDPOINT,
