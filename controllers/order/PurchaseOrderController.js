@@ -62,8 +62,10 @@ class PurchaseOrderController{
                     err: newData
                 });
             }
-            dataResponse = {...dataResponse, 'user': { 'nome': newData.return[0].name, 
-                    'cpf': newData.return[0].cpf}}
+            dataResponse = {
+                'user': { 'nome': newData.return[0].name, 
+                'cpf': newData.return[0].cpf
+            }}
 
 
         }catch(err){
@@ -131,7 +133,11 @@ class PurchaseOrderController{
             });
         }
           
-        return res.json({res:dataResponse})      
+        return res.json({
+            error: false,
+            msg:'Sucesso',
+            data:dataResponse
+        })      
     }
     async findQRcodeById(req,res){
 
@@ -172,11 +178,11 @@ class PurchaseOrderController{
     }
     async listAll(req,res){
         
-
+        console.log("____")
         const {matriculation} = req.params;
         let dataResponse = {}
 
-        //@@select
+        //@@List
         try{
             
             const newData = await PurchaseOrderModel.listAllMatriculation(matriculation)
@@ -195,9 +201,6 @@ class PurchaseOrderController{
                 msgErr: err
             });
         }
-          
-        //QRCODE
-        return res.json({res:dataResponse})
           
     }
 }

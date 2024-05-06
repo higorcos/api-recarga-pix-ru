@@ -11,6 +11,7 @@ const saltRounds = 10;
 class UserController{
     async login(req,res){
         const {email,password} = req.body;
+        console.log(email,password)
         if(email != undefined && password != undefined){
 
             const user = await UsersModel.findByEmail(email);
@@ -25,7 +26,7 @@ class UserController{
                     idUser: user.return.matriculation, 
                     role: user.return.role 
                 }, secret,{ expiresIn: '24h' });
-
+                console.log('sucesso')
                    return res.status(202).json({
                        error: false,
                        msg:'Login realizado com Sucesso',

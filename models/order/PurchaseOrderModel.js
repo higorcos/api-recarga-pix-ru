@@ -63,7 +63,12 @@ class PurchaseOrderModel{
     async listAllMatriculation(matriculation){
      
         try{
-            const result = await knex.select('*').where({matriculation}).table("ru_purchase_order").innerJoin('ru_order_status_type', { 'status': 'id_order_status_type' });
+            const result = await knex
+            .select('*')
+            .where({ matriculation })
+            .table("ru_purchase_order")
+            .innerJoin('ru_order_status_type', { 'status': 'id_order_status_type' })
+            .orderBy('ru_purchase_order.created_on', 'desc'); 
             
             return {err: false , return: result};  
             
