@@ -21,6 +21,7 @@ class PurchaseOrderModel{
 
         try{
             let newFormatValue = convertMonetaryValue.numberToString(devedor_valor)
+            console.log(newFormatValue)
             if(newFormatValue.err){
                 return {err: true , return: result};  
             }
