@@ -3,6 +3,7 @@ import api from '@/services/api'
 import React, { FormEvent,useState } from 'react'
 import { AxiosResponse, AxiosError } from 'axios';
 import { useRouter } from 'next/navigation'
+import { authHeaders, getClientSession } from '@/services/session'
 
 interface Order {
   recharge_value:string
@@ -22,7 +23,7 @@ export default function FormSolicitacaoRecarga() {
 
   const [formData, setFormData] = useState<Order>({
     recharge_value:"",
-    matriculation:"20234234009824",
+    matriculation:"",
   }); 
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +39,12 @@ export default function FormSolicitacaoRecarga() {
     
     try{
      
-      const {data:result}:AxiosResponse<ReturnLogin> = await api.post('/purchase-order', formData)
+      const session = getClientSession()
+      if(!session){
+        router.push('/login')
+        return
+      }
+      const {data:result}:AxiosResponse<ReturnLogin> = await api.post('/purchase-order', {...formData, matriculation: session.matriculation}, {headers: authHeaders(session.token)})
       
       if(!result.error){
         

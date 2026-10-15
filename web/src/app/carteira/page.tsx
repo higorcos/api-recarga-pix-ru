@@ -1,7 +1,8 @@
-'use client'
 import CardInfo from "@/components/cardInfo";
 import Navbar from "@/components/navBar";
 import api from "@/services/api";
+import { authHeaders } from "@/services/session";
+import { getServerSession } from "@/services/serverSession";
 import { AxiosResponse, AxiosError } from 'axios';
 
 
@@ -20,10 +21,12 @@ interface DataCard {
 
 
 const getData = async ()=>{
-  const matriculation = '20234234009824';
-  const cod_ru = '1697478898418'
+  const session = getServerSession();
+  if(!session){
+    return {error: true, data: []}
+  }
   try{
-    const {data:result}:AxiosResponse<DataAxiosCard> = await api.post(`/card/info`,{ matriculation, cod_ru})
+    const {data:result}:AxiosResponse<DataAxiosCard> = await api.post(`/card/info`,{ matriculation: session.matriculation }, {headers: authHeaders(session.token)})
     if(!result.error){
       return {error: false, data: result["data"]}
 

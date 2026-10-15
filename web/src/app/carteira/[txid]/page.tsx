@@ -1,6 +1,8 @@
 // "use client"
 import ShowQRcode from "@/components/showQRcode";
 import api from "@/services/api";
+import { authHeaders } from "@/services/session";
+import { getServerSession } from "@/services/serverSession";
 import { AxiosResponse, AxiosError } from 'axios';
 
 
@@ -35,9 +37,12 @@ interface DataPurchaseOrder {
 }
 
 const getData = async (txid:string)=>{
-  const matriculation = '20234234009824'
+  const session = getServerSession();
+  if(!session){
+    return {error: true, data: []}
+  }
   try{
-    const {data:result}:AxiosResponse<DataAxiosPurchaseOrder> = await api.get(`/purchase-order/${matriculation}/${txid}`)
+    const {data:result}:AxiosResponse<DataAxiosPurchaseOrder> = await api.get(`/purchase-order/${session.matriculation}/${txid}`, {headers: authHeaders(session.token)})
     if(!result.error){
       return {error: false, data: result["data"]}
 

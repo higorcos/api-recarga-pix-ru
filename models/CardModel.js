@@ -47,7 +47,9 @@ class CardModel{
     async showDataCard(matriculation,cod_ru){
 
         try{
-            const dataCard = await knex.select().where({matriculation,cod_ru}).table("ru_food_card");
+            //cod_ru é opcional: cada matrícula tem um único cartão
+            const filter = cod_ru !== undefined ? {matriculation,cod_ru} : {matriculation};
+            const dataCard = await knex.select().where(filter).table("ru_food_card");
             if(dataCard.length == 0 ){
                 return {err: true, return: [], msg:"Não encontrado"};  
             }

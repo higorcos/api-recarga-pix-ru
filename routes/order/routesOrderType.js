@@ -6,10 +6,10 @@ const TokenVerification = require('../../middleware/secondary/DefaultAuth');
 const OrderTypeController = require('../../controllers/order/OrderTypeController')
 
 
-router.post('/order-type', OrderTypeController.created); //Criar Status
-router.patch('/order-type/:id', OrderTypeController.updated); //Atualiza
-router.get('/order-type', OrderTypeController.listAll); //Mostrar Informações de uma
-router.get('/order-type/:id', OrderTypeController.listById); //Mostrar um 
+router.post('/order-type', AdminAuth, OrderTypeController.created); //Criar Status
+router.patch('/order-type/:id', AdminAuth, OrderTypeController.updated); //Atualiza
+router.get('/order-type', TokenVerification, OrderTypeController.listAll); //Mostrar Informações de uma
+router.get('/order-type/:id', TokenVerification, OrderTypeController.listById); //Mostrar um 
 
 
 

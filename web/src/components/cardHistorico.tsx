@@ -1,3 +1,5 @@
+"use client"
+
 import Image from "next/image";
 import icone from '../../public/icons/copy.svg' 
 

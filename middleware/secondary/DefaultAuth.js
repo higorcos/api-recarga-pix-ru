@@ -15,7 +15,7 @@ module.exports = function(req,res,next){
 
     try {
       const decoded = jwt.verify(token, secret);
-      // console.log(decoded.role)
+      req.user = decoded; //{email, name, idUser (matrícula), role}
             next();
       
 

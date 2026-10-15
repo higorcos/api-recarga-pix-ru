@@ -1,7 +1,8 @@
-"use client"
 
 import CardHistorico from './cardHistorico';
 import api from '../services/api';
+import { authHeaders } from '../services/session';
+import { getServerSession } from '../services/serverSession';
 import { AxiosResponse } from 'axios';
 
 interface DataAxiosHistoric {
@@ -32,9 +33,12 @@ interface TypeDataHistory {
 }
 
 const getData = async ()=>{
-  const matriculation = '20234234009824'
+  const session = getServerSession();
+  if(!session){
+    return {error: true, data: []}
+  }
   try{
-    const {data:result}:AxiosResponse<DataAxiosHistoric> = await api.get(`/purchase-order/${matriculation}`)
+    const {data:result}:AxiosResponse<DataAxiosHistoric> = await api.get(`/purchase-order/${session.matriculation}`, {headers: authHeaders(session.token)})
     if(!result.error){
       return {error: false, data: result["data"]}
 

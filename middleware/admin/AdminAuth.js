@@ -17,9 +17,10 @@ module.exports = function(req,res,next){
       const decoded = jwt.verify(token, secret);
 
         if(decoded.role == 1){
+            req.user = decoded;
             next();
         }else{
-            return res.status(401).json({ error: 'Sem autorização' });
+            return res.status(403).json({ error: 'Sem autorização' });
         }
 
     } catch (error) {

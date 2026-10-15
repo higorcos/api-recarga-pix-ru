@@ -258,7 +258,7 @@ class CardController{
     async show(req,res){
         const {cod_ru, matriculation} = req.body
 
-        if(cod_ru !== undefined){
+        if(matriculation !== undefined){
            
             const result = await CardModel.showDataCard(matriculation,cod_ru);
                 
@@ -284,7 +284,7 @@ class CardController{
             return res.status(422).json({
                 error: true,
                 msg:'Validation Failed',
-                field : ["cod_ru" , "matricula"]
+                field : ["matriculation"]
                 
             });
         }

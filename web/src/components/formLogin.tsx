@@ -3,6 +3,7 @@ import api from '@/services/api'
 import React, { FormEvent,useState } from 'react'
 import { AxiosResponse, AxiosError } from 'axios';
 import { useRouter } from 'next/navigation'
+import { saveToken } from '@/services/session'
 
 interface User {
   email: string;
@@ -36,8 +37,8 @@ export default  function FormLogin() {
     event.preventDefault();
     try{
       const {data:result}:AxiosResponse<ReturnLogin> = await api.post('/login', formData)
-      if(!result.error){
-        
+      if(!result.error && result.token){
+        saveToken(result.token)
         router.push('/historico')
        
       }else{
