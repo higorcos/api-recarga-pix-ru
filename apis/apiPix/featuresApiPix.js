@@ -106,6 +106,24 @@ async createBilling(data){
             err:err}
     }
 }
+//Consulta a cobrança na Efí. O status "CONCLUIDA" indica que o Pix foi pago.
+async searchBilling(txid){
+    try{
+        const apiPix = await pixRequest(); //Pegar Novo Token
+        const {data} = await apiPix.get(`/v2/cob/${encodeURIComponent(txid)}`)
+        return {
+            error: false,
+            msg: 'Sucesso',
+            data,
+        }
+    }catch(err){
+        return {
+            error: true,
+            msg:'Erro, consulta da cobrança na api de pagamento',
+            dataError: err.message
+        }
+    }
+}
 async searchQRcode(idLocCob){
     try{
         const apiPix = await pixRequest(); //Pegar Novo Token 

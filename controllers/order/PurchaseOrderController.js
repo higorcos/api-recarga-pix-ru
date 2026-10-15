@@ -1,6 +1,7 @@
 const PurchaseOrderModel = require('../../models/order/PurchaseOrderModel');
 const UserModel = require('../../models/UserModel');
 const {createBilling,searchQRcode} = require('../../apis/apiPix/featuresApiPix')
+const {confirmPayment} = require('../../services/paymentConfirmation')
 
 
 
@@ -145,12 +146,19 @@ class PurchaseOrderController{
         
         try{
 
-            const resultFindById = await PurchaseOrderModel.findById(matriculation,txid);
+            let resultFindById = await PurchaseOrderModel.findById(matriculation,txid);
             if(!resultFindById.err){
                 if(resultFindById.return.length !== 0){
 
+                    //Se ainda está pendente, confere na Efí se já foi paga (caso o webhook não tenha chegado)
+                    if(resultFindById.return[0]["status"] === 0){
+                        const resultConfirm = await confirmPayment(txid);
+                        if(resultConfirm.credited){
+                            resultFindById = await PurchaseOrderModel.findById(matriculation,txid);
+                        }
+                    }
+
                     const loc = resultFindById.return[0]["devedor_loc"]
-                    const statusDB = resultFindById.return[0]["devedor_loc"]
                     const resultSearchQRcode = await searchQRcode(loc);
                     
 

@@ -49,6 +49,18 @@ class PurchaseOrderModel{
             return {err: true, return: err}
         }
     }
+    async findByTxid(devedor_txid){
+
+        try{
+            const result = await knex.select('devedor_txid', 'matriculation', 'devedor_valor', 'status').where({devedor_txid}).table("ru_purchase_order");
+
+            return {err: false , return: result[0]};
+
+        }catch(err){
+
+            return {err: true, return: err}
+        }
+    }
     async findById(matriculation, devedor_txid){
      
         try{

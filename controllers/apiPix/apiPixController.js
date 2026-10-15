@@ -1,32 +1,27 @@
-const {pixRequest} = require('../../apis/apiPix/credentials')
-const {createBilling} = require('../../apis/apiPix/featuresApiPix')
-const MovementHistoryModel = require('../../models/order/MovementHistoryModel')
-
-//Pegar Novo Token quando a aplicação for startada 
-const apiPixA = pixRequest();
+const {confirmPayment} = require('../../services/paymentConfirmation')
 
 class billingPixController{
 
-async createBilling (req,res){
-    /*
-    const result = await createBilling({nome:'teste',cpf:'12345678909', valor: '10.00'})
-    return res.send(`<div class="boxQrcode">
-    <h3>QRCODE</h3>
-    <img src=${result.data.qrcode} alt="" srcset="">
-    </div>`)
-    */
+//Webhook da Efí: recebe {pix: [{txid, endToEndId, valor, horario}, ...]} quando um Pix é pago.
+//O corpo serve só para saber quais txids conferir; o crédito depende da consulta à Efí em confirmPayment.
+async webhook(req,res){
+    const pixList = Array.isArray(req.body?.pix) ? req.body.pix : []; //A notificação de teste da Efí não traz "pix"
+    let failed = false;
 
-    const result = await MovementHistoryModel.transactionRecharge()
+    for(const pix of pixList){
+        if(!pix.txid){
+            continue; //Pix recebido sem cobrança vinculada (ex.: enviado direto para a chave)
+        }
+        const result = await confirmPayment(pix.txid);
+        console.log(`Webhook Pix txid=${pix.txid}: ${result.msg}`);
+        if(result.err){
+            failed = true;
+        }
+    }
 
-     
-}
-
-webhook(req,res){
-    console.log(req.body);
-    res.send('200');
+    //Com erro, responde 500 para a Efí reenviar a notificação depois
+    return res.status(failed ? 500 : 200).send(failed ? 'erro' : '200');
 }
 }
 
 module.exports = new billingPixController();
-
-
