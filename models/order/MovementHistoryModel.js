@@ -3,58 +3,50 @@ const knex = require('../../database/connection');
 const moneyOperations = require('../../utils/moneyOperations/math')
 const convertMonetaryValue = require('../../utils/moneyOperations/convertMonetaryValue');
 
-const PurchaseOrderModel = require('../../models/order/PurchaseOrderModel');
-
 
 
 class MovementHistoryModel{
     async transactionRecharge(devedor_txid){
-       
-        console.log('transactionRecharge')
         try{
-            await knex.transaction(async trans=>{
-                //Busca ordem de compra
-                console.log('Busca ordem de compra')
-                const dataPurchaseOrder = await trans.select('ru_purchase_order.matriculation', 'ru_purchase_order.devedor_valor').where({devedor_txid, status: 0}).table("ru_purchase_order");
+            return await knex.transaction(async trans=>{
+                //Busca a ordem pendente e trava a linha até o fim da transação (SELECT ... FOR UPDATE).
+                //Se outra chamada tentar creditar o mesmo txid ao mesmo tempo, ela espera aqui e,
+                //quando seguir, já encontra a ordem paga (status 1) e não credita de novo.
+                const dataPurchaseOrder = await trans.select('matriculation', 'devedor_valor').where({devedor_txid, status: 0}).table("ru_purchase_order").forUpdate();
+                if(dataPurchaseOrder.length === 0){
+                    return {err: false, credited: false, return: 'Ordem inexistente ou já creditada'};
+                }
                 const matriculation = dataPurchaseOrder[0].matriculation;
-                let recharge_value = dataPurchaseOrder[0].devedor_valor; //Valor da operção para adicionar
-                recharge_value = convertMonetaryValue.stringToNumber(recharge_value);
+                const recharge_value = convertMonetaryValue.stringToNumber(dataPurchaseOrder[0].devedor_valor); //Valor da operação para adicionar
 
-                // Pega id cartão
-                console.log('Pega id cartão')
-                let dataCard = await trans.select('ru_food_card.*').table('users').fullOuterJoin('ru_food_card','ru_food_card.matriculation','users.matriculation').where({'users.matriculation' : matriculation});
-                let currentValueCard = dataCard[0].value; //Valor atual
-                dataCard = dataCard[0];
-                console.log('S_N')
-                currentValueCard = convertMonetaryValue.stringToNumber(currentValueCard);
-    
-                let nemValue = moneyOperations.sum(recharge_value.return,currentValueCard.return)
-                let value = convertMonetaryValue.numberToString(nemValue.return)
+                //Busca o cartão, também travado, para o saldo não ser alterado por outra operação no meio
+                const dataCard = await trans.select('cod_ru', 'value').where({matriculation}).table("ru_food_card").forUpdate();
+                if(dataCard.length === 0){
+                    throw new Error('Cartão não encontrado para a matrícula ' + matriculation);
+                }
+                const currentValueCard = convertMonetaryValue.stringToNumber(dataCard[0].value);
+
+                const newValue = moneyOperations.sum(recharge_value.return, currentValueCard.return)
+                const value = convertMonetaryValue.numberToString(newValue.return)
 
                 //adicionar valor recebido pelo pix ao cartão
-                console.log('adicionar')
-                const updated = await trans.update({value:value.return}).where({matriculation,cod_ru:dataCard.cod_ru}).table("ru_food_card");
-                
+                await trans.update({value:value.return, updated_on: knex.fn.now()}).where({cod_ru:dataCard[0].cod_ru}).table("ru_food_card");
+
                 //salvar a movimentação
                 const valuePurchaseOrder = convertMonetaryValue.numberToString(recharge_value.return); //Valor da operação
-                const insertMove = await trans.insert({
+                await trans.insert({
                     idPurchaseOrder: devedor_txid,
-                    idfoodcard:	dataCard.cod_ru,
+                    idfoodcard:	dataCard[0].cod_ru,
                     value:	valuePurchaseOrder.return,
                     typemove:1,
                 }).table("ru_movement_history");
 
-                //Mudar status
-                
-                const updatedStatus = await trans.update({status:1}).where({devedor_txid}).table("ru_purchase_order");
-                
-               
-                return {err: false , return: {
-                    //matriculation:dataPurchaseOrder[0].matriculation,
-                    //dataCard: dataCard
-                }};  
+                //Mudar status para pago
+                await trans.update({status:1}).where({devedor_txid}).table("ru_purchase_order");
+
+                return {err: false, credited: true, return: {matriculation, newValue: value.return}};
             })
-            
+
         }catch(err){
 
             return {err: true, return: err}
