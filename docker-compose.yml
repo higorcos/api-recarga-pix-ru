@@ -1,0 +1,16 @@
+services:
+  db:
+    build: ./database
+    environment:
+      POSTGRES_USER: ru
+      POSTGRES_PASSWORD: ru
+      POSTGRES_DB: ru
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - dados:/var/lib/postgresql/data
+
+volumes:
+  dados:
